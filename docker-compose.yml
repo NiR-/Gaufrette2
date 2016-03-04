@@ -2,3 +2,6 @@ gaufrette:
     build: .
     volumes:
         - "./:/src"
+
+s3rver:
+    build: docker/s3rver
