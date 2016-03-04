@@ -27,7 +27,7 @@ final class File implements \IteratorAggregate
         $size = 0;
         $chunks = call_user_func($content);
         foreach ($chunks as $chunk) {
-            $size += strlen($chunk);
+            $size += mb_strlen($chunk, '8bit');
         }
 
         return $size;
