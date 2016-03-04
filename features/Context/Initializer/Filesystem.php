@@ -19,12 +19,13 @@ final class Filesystem implements ArgumentResolver
         return [
             new Local,
             function($path) {
+                @unlink($path);
                 @mkdir(dirname($path), 0777, true);
                 file_put_contents($path, 'some content');
             },
             function($path) {
-                expect(filesize($path))->toBe(10000000 * 3);
-            }
+                expect(filesize($path))->toBe(10000 * 3);
+            },
         ];
     }
 }

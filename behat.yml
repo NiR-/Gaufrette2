@@ -3,7 +3,7 @@ default:
         '': %paths.base%/
 
     extensions:
-        features\Context\Extension: ~
+        features\Context\Extension:
 
     suites:
         domain:
@@ -15,3 +15,4 @@ default:
             filters: { tags: '@infrastructure' }
             contexts:
                 - features\Context\Infrastructure
+            settings: [test]

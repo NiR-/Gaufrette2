@@ -10,4 +10,3 @@ Feature: local files
         Given a file object for "./a/path"
         When I write it
         Then it should be stored
-

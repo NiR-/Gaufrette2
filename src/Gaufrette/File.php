@@ -12,7 +12,6 @@ final class File implements \IteratorAggregate
     {
         $this->path = $path;
         $this->content = $content;
-        $this->size = $this->calculateSize($content);
         $this->metadata = $metadata;
         $this->mode = $mode;
     }
@@ -20,7 +19,7 @@ final class File implements \IteratorAggregate
     public function setContent(callable $content)
     {
         $this->content = $content;
-        $this->size = $this->calculateSize($content);
+        $this->size = null;
     }
 
     private function calculateSize($content): int
@@ -36,7 +35,10 @@ final class File implements \IteratorAggregate
 
     public function getSize(): int
     {
-        return $this->size;
+        if (null !== $this->size) {
+            return $this->size;
+        }
+        return $this->size = $this->calculateSize($this->content);
     }
 
     public function getContent(): callable
