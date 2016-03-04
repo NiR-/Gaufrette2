@@ -1,0 +1,28 @@
+{
+    "name": "gaufrette/gaufrette2",
+    "description": "OO abstraction of a filesystem",
+    "type": "library",
+    "require-dev": {
+        "phpspec/phpspec": "^2.4",
+        "behat/behat": "^3.0",
+        "bossa/phpspec2-expect": "^1.0"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Klein Florian",
+            "email": "florian.klein@free.fr"
+        }
+    ],
+    "require": {},
+    "autoload": {
+        "psr-0": {
+            "Gaufrette\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-0": {
+            "features": ""
+        }
+    }
+}

@@ -1,0 +1,17 @@
+default:
+    autoload:
+        '': %paths.base%/
+
+    extensions:
+        features\Context\Extension: ~
+
+    suites:
+        domain:
+            filters: { tags: '~@infrastructure' }
+            contexts:
+                - features\Context\Domain:
+
+        infrastructure:
+            filters: { tags: '@infrastructure' }
+            contexts:
+                - features\Context\Infrastructure
