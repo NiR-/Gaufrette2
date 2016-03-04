@@ -12,9 +12,15 @@
         {
             "name": "Klein Florian",
             "email": "florian.klein@free.fr"
+        },
+        {
+            "name": "Albin Kerouanton",
+            "email": "albin@akerouanton.name"
         }
     ],
-    "require": {},
+    "require": {
+        "php": ">=7.0"
+    },
     "autoload": {
         "psr-0": {
             "Gaufrette\\": "src"

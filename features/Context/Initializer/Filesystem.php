@@ -16,15 +16,16 @@ final class Filesystem implements ArgumentResolver
             return $arguments;
         }
 
+        $basePath = sys_get_temp_dir().'/';
         return [
-            new Local,
-            function($path) {
-                @unlink($path);
-                @mkdir(dirname($path), 0777, true);
-                file_put_contents($path, 'some content');
+            new Local\Filesystem($basePath),
+            function($path) use ($basePath){
+                @unlink($basePath.$path);
+                @mkdir(dirname($basePath.$path), 0777, true);
+                file_put_contents($basePath.$path, 'some content');
             },
-            function($path) {
-                expect(filesize($path))->toBe(10000 * 3);
+            function($path) use($basePath){
+                expect(filesize($basePath.$path))->toBe(10000 * 3);
             },
         ];
     }

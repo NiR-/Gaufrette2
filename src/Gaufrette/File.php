@@ -1,10 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Gaufrette;
 
 final class File implements \IteratorAggregate
 {
     private $content;
+    private $size;
     private $metadata;
     private $mode;
 

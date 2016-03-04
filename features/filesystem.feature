@@ -1,5 +1,5 @@
 @infrastructure
-Feature: local files
+Feature: filesystem
 
     Scenario: read
         Given a file stored at "./a/path"
