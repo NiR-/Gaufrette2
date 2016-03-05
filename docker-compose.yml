@@ -2,6 +2,10 @@ gaufrette:
     build: .
     volumes:
         - "./:/src"
+    environment:
+        AWS_ACCESS_KEY: $AWS_ACCESS_KEY
+        AWS_SECRET_KEY: $AWS_SECRET_KEY
+
 
 s3rver:
     build: docker/s3rver

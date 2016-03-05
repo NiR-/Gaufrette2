@@ -6,13 +6,12 @@ default:
         features\Context\Extension:
 
     suites:
-        domain:
-            filters: { tags: '~@infrastructure' }
+        local:
             contexts:
-                - features\Context\Domain:
+                - features\Context\Infrastructure:
+                    fs: local
 
-        infrastructure:
-            filters: { tags: '@infrastructure' }
+        s3:
             contexts:
-                - features\Context\Infrastructure
-            settings: [test]
+                - features\Context\Infrastructure:
+                    fs: s3

@@ -54,7 +54,7 @@ final class Infrastructure implements Context, SnippetAcceptingContext
     {
         $this->path = $path;
         $this->file = new File($path, function(){
-            for($i = 0; $i < 1000000; $i++) {
+            for($i = 0; $i < 1000; $i++) {
                 yield 'abc';
             }
         });

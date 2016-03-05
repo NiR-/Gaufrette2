@@ -10,6 +10,8 @@ use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Behat\Behat\Context\ServiceContainer\ContextExtension;
 use features\Context\Initializer\Filesystem;
+use Gaufrette\Filesystem\AwsS3\FeatureContextResolver as AwsS3;
+use Gaufrette\Filesystem\Local\FeatureContextResolver as Local;
 
 final class Extension implements ServiceContainer\Extension
 {
@@ -32,8 +34,14 @@ final class Extension implements ServiceContainer\Extension
 
     public function load(ContainerBuilder $container, array $config)
     {
-        $definition = new Definition(Filesystem::class);
-        $definition->addTag(ContextExtension::ARGUMENT_RESOLVER_TAG);
-        $container->setDefinition('gaufrette.context.argument_resolver.filesystem', $definition);
+        $classes = [
+            Local::class,
+            AwsS3::class,
+        ];
+        foreach ($classes as $fs => $class) {
+            $definition = new Definition($class);
+            $definition->addTag(ContextExtension::ARGUMENT_RESOLVER_TAG);
+            $container->setDefinition('gaufrette.context.argument_resolver.'.$fs, $definition);
+        }
     }
 }
