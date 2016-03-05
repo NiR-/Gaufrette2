@@ -2,8 +2,8 @@
 
 namespace features\Context\Initializer;
 
-use Behat\Behat\Context\Initializer\ContextInitializer;
-use Behat\Behat\Context\Context;
+use Aws\S3\S3Client;
+use Gaufrette\Filesystem\AwsS3;
 use Behat\Behat\Context\Argument\ArgumentResolver;
 use Gaufrette\Filesystem\Local;
 use features\Context\Infrastructure;
@@ -17,7 +17,7 @@ final class Filesystem implements ArgumentResolver
         }
 
         $basePath = sys_get_temp_dir().'/';
-        return [
+        /*return [
             new Local\Filesystem($basePath),
             function($path) use ($basePath){
                 @unlink($basePath.$path);
@@ -26,6 +26,25 @@ final class Filesystem implements ArgumentResolver
             },
             function($path) use($basePath){
                 expect(filesize($basePath.$path))->toBe(10000 * 3);
+            },
+        ];*/
+
+        $s3Args = [
+            'region' => 'eu-west-1',
+            'version' => 'latest',
+            'credentials' => [
+                'key'    => 'AKIAIXZ3H6QDRWG543RQ',
+                'secret' => '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',
+            ],
+        ];
+
+        return [
+            new AwsS3\Filesystem(new S3Client($s3Args), uniqid()),
+            function () {
+                var_dump(func_get_args());
+            },
+            function () {
+                var_dump(func_get_args());
             },
         ];
     }

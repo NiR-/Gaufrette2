@@ -5,7 +5,8 @@
     "require-dev": {
         "phpspec/phpspec": "^2.4",
         "behat/behat": "^3.0",
-        "bossa/phpspec2-expect": "^1.0"
+        "bossa/phpspec2-expect": "^1.0",
+        "aws/aws-sdk-php": "^3.15"
     },
     "license": "MIT",
     "authors": [
