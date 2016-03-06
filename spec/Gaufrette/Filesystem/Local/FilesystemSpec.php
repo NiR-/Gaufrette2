@@ -2,6 +2,7 @@
 
 namespace spec\Gaufrette\Filesystem\Local;
 
+use Gaufrette\Exception\CouldNotDelete;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
 use Gaufrette\Filesystem\Local\Client;
@@ -15,6 +16,12 @@ class FilesystemSpec extends ObjectBehavior
     function let(Client $client)
     {
         $this->beConstructedWith('/base/path', $client);
+    }
+
+    function it_is_initializable()
+    {
+        $this->shouldImplement('Gaufrette\Filesystem');
+        $this->shouldHaveType('Gaufrette\Filesystem\Local\Filesystem');
     }
 
     function it_throws_if_could_not_open($client)
@@ -53,5 +60,11 @@ class FilesystemSpec extends ObjectBehavior
         $this->shouldThrow(CouldNotWrite::class)->during('write', [new File('a/path', function() {
             return new \ArrayIterator(['a']);
         })]);
+    }
+
+    function it_throws_if_could_not_delete($client)
+    {
+        $client->unlink('/base/path/a/path')->willReturn(false);
+        $this->shouldThrow(CouldNotDelete::class)->during('delete', [new File('a/path', function () {})]);
     }
 }

@@ -4,18 +4,28 @@ declare(strict_types=1);
 
 namespace Gaufrette\Filesystem\Local;
 
-use Gaufrette\File;
-use Gaufrette\Exception\CouldNotOpen;
-use Gaufrette\Filesystem\Local\Client;
+use Gaufrette\Exception\CouldNotDelete;
+use Gaufrette\Exception\CouldNotOpen;;
 use Gaufrette\Exception\CouldNotRead;
 use Gaufrette\Exception\CouldNotWrite;
+use Gaufrette\File;
 
 final class Filesystem implements \Gaufrette\Filesystem
 {
+    /** @var Client */
     private $client;
+
+    /** @var string */
     private $basePath;
+
+    /** @var int */
     private $chunkSize;
 
+    /**
+     * @param string      $basePath
+     * @param Client|null $client
+     * @param int         $chunkSize
+     */
     public function __construct(string $basePath, Client $client = null, $chunkSize = 1024)
     {
         $this->basePath = $basePath;
@@ -23,11 +33,17 @@ final class Filesystem implements \Gaufrette\Filesystem
         $this->chunkSize = $chunkSize;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function read(string $path): File
     {
         return new File($path, $this->iterate($path));
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function write(File $file)
     {
         if (!$pointer = $this->client->fopen($this->absolutify($file->getPath()), 'w+')) {
@@ -49,6 +65,21 @@ final class Filesystem implements \Gaufrette\Filesystem
         }
     }
 
+    /**
+     * {@inheritdoc}
+     */
+    public function delete(File $file)
+    {
+        if (!$this->client->unlink($this->absolutify($file->getPath()))) {
+            throw CouldNotDelete::create($this, $file->getPath());
+        }
+    }
+
+    /**
+     * @param string $path
+     *
+     * @return callable
+     */
     private function iterate($path): callable
     {
         return function() use($path) {
@@ -70,6 +101,11 @@ final class Filesystem implements \Gaufrette\Filesystem
         };
     }
 
+    /**
+     * @param string $path
+     *
+     * @return string
+     */
     private function absolutify(string $path)
     {
         return sprintf('%s/%s', rtrim($this->basePath, '/'), ltrim($path, '/'));

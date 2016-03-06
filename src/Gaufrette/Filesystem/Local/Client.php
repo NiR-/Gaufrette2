@@ -44,4 +44,9 @@ class Client
 
         return mkdir($path, 0777, true);
     }
+
+    public function unlink($path)
+    {
+        return @unlink($path);
+    }
 }

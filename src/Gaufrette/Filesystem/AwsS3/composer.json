@@ -1,0 +1,31 @@
+{
+    "name": "gaufrette/aws-s3-filesystem",
+    "description": "AWS S3 filesystem implementation",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Klein Florian",
+            "email": "florian.klein@free.fr"
+        },
+        {
+            "name": "Albin Kerouanton",
+            "email": "albin@akerouanton.name"
+        }
+    ],
+    "require": {
+        "php": ">=7.0",
+        "gaufrette/gaufrette2": "dev-master"
+    },
+    "autoload": {
+        "psr-4": {
+            "Gaufrette\\Filesystem\\Local\\": ""
+        }
+    },
+    "repositories": [
+        {
+            "type": "path",
+            "url": "../../../.."
+        }
+    ]
+}

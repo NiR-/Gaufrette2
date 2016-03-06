@@ -27,8 +27,11 @@ final class FeatureContextResolver implements ArgumentResolver
                 file_put_contents($basePath.$path, 'some content');
             },
             function($path) use($basePath){
-                expect(filesize($basePath.$path))->toBe(1000 * 3);
+                expect(filesize($basePath.$path))->toBe(1024 * 3);
             },
+            function($path) use ($basePath) {
+                expect(file_exists($basePath.$path));
+            }
         ];
     }
 }

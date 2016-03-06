@@ -2,11 +2,16 @@
 Feature: filesystem
 
     Scenario: read
-        Given a file stored at "./a/path"
+        Given a file stored at "/a/path"
         When I ask for this file
         Then I should get the corresponding file object
 
     Scenario: write
-        Given a file object for "./a/path"
+        Given a file object for "/a/path"
         When I write it
         Then it should be stored
+
+    Scenario: delete
+        Given a file object for "/a/path"
+        When I delete it
+        Then it should be deleted

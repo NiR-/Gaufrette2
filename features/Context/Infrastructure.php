@@ -2,7 +2,6 @@
 
 namespace features\Context;
 
-use Behat\Behat\Tester\Exception\PendingException;
 use Behat\Behat\Context\Context;
 use Behat\Behat\Context\SnippetAcceptingContext;
 use Gaufrette\Filesystem;
@@ -10,15 +9,23 @@ use Gaufrette\File;
 
 final class Infrastructure implements Context, SnippetAcceptingContext
 {
-    private $source;
-    private $dest;
+    private $readInitializer;
+    private $writeExpectation;
     private $fs;
+    private $path;
+    private $file;
+    private $deleteExpectation;
 
-    public function __construct(Filesystem $fs, callable $source, callable $dest)
-    {
-        $this->source = $source;
-        $this->dest = $dest;
+    public function __construct(
+        Filesystem $fs,
+        callable $readInitializer,
+        callable $writeExpectation,
+        callable $deleteExpectation
+    ) {
         $this->fs = $fs;
+        $this->readInitializer   = $readInitializer;
+        $this->writeExpectation  = $writeExpectation;
+        $this->deleteExpectation = $deleteExpectation;
     }
 
     /**
@@ -27,7 +34,7 @@ final class Infrastructure implements Context, SnippetAcceptingContext
     public function aFileStoredAt($path)
     {
         $this->path = $path;
-        ($this->source)($path);
+        ($this->readInitializer)($path);
     }
 
     /**
@@ -44,7 +51,7 @@ final class Infrastructure implements Context, SnippetAcceptingContext
     public function iShouldGetTheCorrespondingFileObject()
     {
         $file = $this->fs->read($this->path);
-//        expect(implode(iterator_to_array($file)))->toBe('some content');
+        expect(implode(iterator_to_array($file)))->toBe('some content');
     }
 
     /**
@@ -54,8 +61,8 @@ final class Infrastructure implements Context, SnippetAcceptingContext
     {
         $this->path = $path;
         $this->file = new File($path, function(){
-            for($i = 0; $i < 1000; $i++) {
-                yield 'abc';
+            for($i = 0; $i < 3; $i++) {
+                yield implode(array_fill(0, 1024, 'a'));
             }
         });
     }
@@ -73,6 +80,22 @@ final class Infrastructure implements Context, SnippetAcceptingContext
      */
     public function itShouldBeStored()
     {
-        ($this->dest)($this->path);
+        ($this->writeExpectation)($this->path);
+    }
+
+    /**
+     * @When I delete it
+     */
+    public function iDeleteIt()
+    {
+        $this->fs->delete($this->file);
+    }
+
+    /**
+     * @Then it should be deleted
+     */
+    public function itShouldBeDeleted()
+    {
+        ($this->deleteExpectation)($this->path);
     }
 }
