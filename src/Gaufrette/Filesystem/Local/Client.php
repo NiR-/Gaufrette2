@@ -49,4 +49,22 @@ class Client
     {
         return @unlink($path);
     }
+
+    /**
+     * @param string $path
+     *
+     * @return \RecursiveIteratorIterator
+     *
+     * @throws \UnexpectedValueException
+     */
+    public function list(string $path)
+    {
+        return new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator(
+                $path,
+                \FilesystemIterator::SKIP_DOTS | \FilesystemIterator::UNIX_PATHS
+            ),
+            \RecursiveIteratorIterator::CHILD_FIRST
+        );
+    }
 }

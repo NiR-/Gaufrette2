@@ -15,17 +15,24 @@ final class Infrastructure implements Context, SnippetAcceptingContext
     private $path;
     private $file;
     private $deleteExpectation;
+    private $treeInitializer;
+    private $list;
+    private $treeExpectation;
 
     public function __construct(
         Filesystem $fs,
         callable $readInitializer,
         callable $writeExpectation,
-        callable $deleteExpectation
+        callable $deleteExpectation,
+        callable $treeInitializer,
+        callable $treeExpectation
     ) {
         $this->fs = $fs;
         $this->readInitializer   = $readInitializer;
         $this->writeExpectation  = $writeExpectation;
         $this->deleteExpectation = $deleteExpectation;
+        $this->treeInitializer   = $treeInitializer;
+        $this->treeExpectation   = $treeExpectation;
     }
 
     /**
@@ -97,5 +104,29 @@ final class Infrastructure implements Context, SnippetAcceptingContext
     public function itShouldBeDeleted()
     {
         ($this->deleteExpectation)($this->path);
+    }
+
+    /**
+     * @Given there is a complex tree structure
+     */
+    public function thereIsAComplexTreeStructure()
+    {
+        ($this->treeInitializer)();
+    }
+
+    /**
+     * @When I list
+     */
+    public function iList()
+    {
+        $this->list = $this->fs->list();
+    }
+
+    /**
+     * @Then I should see the complex tree structure
+     */
+    public function iShouldSeeTheComplexTreeStructure()
+    {
+        ($this->treeExpectation)($this->list);
     }
 }

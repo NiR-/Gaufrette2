@@ -6,6 +6,7 @@ use Aws\CommandInterface;
 use Aws\S3\Exception\S3Exception;
 use Aws\S3\S3Client;
 use Gaufrette\Exception\CouldNotDelete;
+use Gaufrette\Exception\CouldNotList;
 use Gaufrette\Exception\CouldNotOpen;
 use Gaufrette\Exception\CouldNotRead;
 use Gaufrette\File;
@@ -83,5 +84,17 @@ class FilesystemSpec extends ObjectBehavior
         $client->deleteObject(['Bucket' => 'bucket-name', 'Key' => 'base/path/a/path'])->willThrow(S3Exception::class);
 
         $this->shouldThrow(CouldNotDelete::class)->during('delete', [new File('a/path', function () {})]);
+    }
+
+    function it_throws_if_could_not_list($client)
+    {
+        $client->doesBucketExist('bucket-name')->willReturn(true);
+        $client
+            ->getIterator('ListObjects', ['Bucket' => 'bucket-name', 'Prefix' => 'base/path/does/not/exists/'])
+            ->willThrow(S3Exception::class)
+        ;
+
+        $generator = $this->list('does/not/exists/');
+        $generator->shouldThrow(CouldNotList::class)->during('current');
     }
 }

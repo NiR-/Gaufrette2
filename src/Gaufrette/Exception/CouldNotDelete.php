@@ -5,7 +5,7 @@ namespace Gaufrette\Exception;
 use Gaufrette\Exception;
 use Gaufrette\Filesystem;
 
-class CouldNotDelete extends \RuntimeException implements Exception
+final class CouldNotDelete extends \RuntimeException implements Exception
 {
     public static function create(Filesystem $filesystem, string $path, \Throwable $previous = null)
     {

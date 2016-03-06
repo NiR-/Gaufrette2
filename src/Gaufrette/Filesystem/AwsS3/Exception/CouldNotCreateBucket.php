@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Gaufrette\Filesystem\AwsS3\Exception;
 
 use Gaufrette\Exception;
 
-class CouldNotCreateBucket extends \Exception implements Exception
+final class CouldNotCreateBucket extends \Exception implements Exception
 {
     /**
      * @param string          $bucket

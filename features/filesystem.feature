@@ -15,3 +15,8 @@ Feature: filesystem
         Given a file object for "/a/path"
         When I delete it
         Then it should be deleted
+
+    Scenario: list
+        Given there is a complex tree structure
+        When I list
+        Then I should see the complex tree structure

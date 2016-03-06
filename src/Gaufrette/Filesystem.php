@@ -29,4 +29,13 @@ interface Filesystem
      * @throws Exception\CouldNotDelete
      */
     public function delete(File $file);
+
+    /**
+     * @param string $directory
+     *
+     * @return \Iterator
+     *
+     * @throws Exception\CouldNotList
+     */
+    public function list(string $directory = ''): \Iterator;
 }

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Gaufrette\Filesystem\Local;
 
 use Gaufrette\Exception\CouldNotDelete;
+use Gaufrette\Exception\CouldNotList;
 use Gaufrette\Exception\CouldNotOpen;;
 use Gaufrette\Exception\CouldNotRead;
 use Gaufrette\Exception\CouldNotWrite;
@@ -72,6 +73,28 @@ final class Filesystem implements \Gaufrette\Filesystem
     {
         if (!$this->client->unlink($this->absolutify($file->getPath()))) {
             throw CouldNotDelete::create($this, $file->getPath());
+        }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function list(string $path = '/'): \Iterator
+    {
+        $realBasePath = realpath($this->basePath);
+
+        try {
+            $iterator = $this->client->list($this->absolutify(rtrim($path, '/') . '/'));
+
+            foreach ($iterator as $file) {
+                if (!$file->isFile()) {
+                    continue;
+                }
+
+                yield substr($file->getPathname(), strlen($realBasePath)) => $this->read($file->getPathname());
+            }
+        } catch (\Throwable $e) {
+            throw CouldNotList::create($this, $path, $e);
         }
     }
 

@@ -1,15 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Gaufrette\Filesystem\AwsS3;
 
 use Aws\Exception\MultipartUploadException;
 use Aws\S3\Exception\S3Exception;
 use Aws\S3\MultipartUploader;
 use Aws\S3\S3Client;
-use Gaufrette\Exception\CouldNotDelete;
-use Gaufrette\Exception\CouldNotOpen;
-use Gaufrette\Exception\CouldNotRead;
-use Gaufrette\Exception\CouldNotWrite;
+use Gaufrette\Exception;
 use Gaufrette\File;
 use Gaufrette\Filesystem\AwsS3\Exception\CouldNotCreateBucket;
 
@@ -72,7 +71,7 @@ final class Filesystem implements \Gaufrette\Filesystem
                 'part_size' => $this->chunkSize,
             ]))->upload();
         } catch (MultipartUploadException $e) {
-            throw CouldNotWrite::create($this, $file->getPath(), $e);
+            throw Exception\CouldNotWrite::create($this, $file->getPath(), $e);
         }
     }
 
@@ -89,7 +88,28 @@ final class Filesystem implements \Gaufrette\Filesystem
                 'Key' => $this->absolutify($file->getPath()),
             ]);
         } catch (S3Exception $previous) {
-            throw CouldNotDelete::create($this, $file->getPath(), $previous);
+            throw Exception\CouldNotDelete::create($this, $file->getPath(), $previous);
+        }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function list(string $path = ''): \Iterator
+    {
+        $this->ensureBucketExists();
+
+        try {
+            $files = $this->s3Client->getIterator('ListObjects', [
+                'Bucket' => $this->bucket,
+                'Prefix' => $this->absolutify($path)
+            ]);
+
+            foreach ($files as $file) {
+                yield $file['Key'] => $this->read($file['Key']);
+            }
+        } catch (S3Exception $previous) {
+            throw Exception\CouldNotList::create($this, $path, $previous);
         }
     }
 
@@ -111,7 +131,7 @@ final class Filesystem implements \Gaufrette\Filesystem
                 /** @var \GuzzleHttp\Psr7\Stream $stream */
                 $stream = $this->s3Client->execute($command)['Body'];
             } catch (S3Exception $exception) {
-                throw CouldNotOpen::create($this, $path, $exception);
+                throw Exception\CouldNotOpen::create($this, $path, $exception);
             }
 
             while ($chunk = $stream->read($this->chunkSize)) {
@@ -119,7 +139,7 @@ final class Filesystem implements \Gaufrette\Filesystem
             }
 
             if (false === $chunk) {
-                throw CouldNotRead::create($this, $path);
+                throw Exception\CouldNotRead::create($this, $path);
             }
         };
     }

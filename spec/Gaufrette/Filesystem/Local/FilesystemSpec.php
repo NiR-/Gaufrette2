@@ -3,6 +3,7 @@
 namespace spec\Gaufrette\Filesystem\Local;
 
 use Gaufrette\Exception\CouldNotDelete;
+use Gaufrette\Exception\CouldNotList;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
 use Gaufrette\Filesystem\Local\Client;
@@ -66,5 +67,12 @@ class FilesystemSpec extends ObjectBehavior
     {
         $client->unlink('/base/path/a/path')->willReturn(false);
         $this->shouldThrow(CouldNotDelete::class)->during('delete', [new File('a/path', function () {})]);
+    }
+
+    function it_throws_if_could_not_list($client)
+    {
+        $client->list('/base/path/a/complex/path')->willThrow('Exception');
+        $generator = $this->list('does/not/exists/');
+        $generator->shouldThrow(CouldNotList::class)->during('current');
     }
 }
