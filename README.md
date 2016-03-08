@@ -12,15 +12,17 @@ concerning how it handles streams and big files.
 This rewrite is a tentative to redesign the public API in a simpler manner,
 using lazy, iterator based, filesystem-agnostic File value objects.
 
-Using buffered streams effectively reduce the memory footprint from end to end.  
-Execution times are linear relative to content size.  
+Using buffered streams effectively reduce the memory footprint from end to end.
+Execution times are linear relative to content size.
 Memory consumption is relative to the buffer size.
+
+It also makes Directory first-class citizen.
 
 ## How ?
 
 ### Files
 
-Files are represented by a path, a content and metadata.  
+Files are represented by a path, a content and metadata.
 The content has to be represented by a callable that returns an `\Iterator` of some sort.
 
 ```php

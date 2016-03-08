@@ -7,7 +7,7 @@ use Gaufrette\Filesystem;
 
 final class CouldNotList extends \Exception implements Exception
 {
-    public static function create(Filesystem $filesystem, $path, \Throwable $previous = null)
+    public static function create(Filesystem $filesystem, $path, \Throwable $previous = null): CouldNotList
     {
         return new self(sprintf('Filesystem "%s" could not list "%s".', get_class($filesystem), $path), 0, $previous);
     }

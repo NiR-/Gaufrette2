@@ -8,10 +8,14 @@ use Aws\Exception\MultipartUploadException;
 use Aws\S3\Exception\S3Exception;
 use Aws\S3\MultipartUploader;
 use Aws\S3\S3Client;
+use Gaufrette\Directory;
 use Gaufrette\Exception;
 use Gaufrette\File;
 use Gaufrette\Filesystem\AwsS3\Exception\CouldNotCreateBucket;
 
+/**
+ * @TODO: should Filesystem implement some sort of Identity map ?
+ */
 final class Filesystem implements \Gaufrette\Filesystem
 {
     /** @var S3Client */
@@ -60,6 +64,16 @@ final class Filesystem implements \Gaufrette\Filesystem
     /**
      * {@inheritdoc}
      */
+    public function readDirectory(string $path): Directory
+    {
+        $this->ensureBucketExists();
+
+        return new Directory($path, $this->iterateDirectory($path));
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function write(File $file)
     {
         $this->ensureBucketExists();
@@ -95,18 +109,28 @@ final class Filesystem implements \Gaufrette\Filesystem
     /**
      * {@inheritdoc}
      */
-    public function list(string $path = ''): \Iterator
+    public function find(string $path, string $pattern = ''): \Iterator
     {
-        $this->ensureBucketExists();
-
         try {
-            $files = $this->s3Client->getIterator('ListObjects', [
+            $objects = $this->s3Client->getIterator('ListObjects', [
                 'Bucket' => $this->bucket,
                 'Prefix' => $this->absolutify($path)
             ]);
 
-            foreach ($files as $file) {
-                yield $file['Key'] => $this->read($file['Key']);
+            $dirs = [];
+            $basePathLen = strlen($this->basePath);
+
+            foreach ($objects as $file) {
+                $relativeKey = substr($file['Key'], $basePathLen);
+                $dirname = \Gaufrette\dirname($relativeKey);
+
+                if (!in_array($dirname, $dirs) && $dirname !== '.') {
+                    yield $dirname => $this->readDirectory($dirname);
+
+                    $dirs[] = $dirname;
+                }
+
+                yield $relativeKey => $this->read($relativeKey);
             }
         } catch (S3Exception $previous) {
             throw Exception\CouldNotList::create($this, $path, $previous);
@@ -144,6 +168,29 @@ final class Filesystem implements \Gaufrette\Filesystem
         };
     }
 
+    /**
+     * @param string $path
+     *
+     * @return callable
+     */
+    private function iterateDirectory(string $path): callable
+    {
+        return function () use ($path) {
+            $path = trim($path, '/').'/';
+
+            return $this->find($path);
+            /*return new \CallbackFilterIterator($this->find($path), function ($item, string $key, \Iterator $iterator) use($path) {
+                var_dump('yolo', $path);
+                return preg_match('#^'.$path.'[^/]*$#', ltrim($key, '/')) === 1;
+            });*/
+        };
+    }
+
+    /**
+     * @throws CouldNotCreateBucket
+     *
+     * @TODO: should we keep bucket creation responsibility ? if yes,  how do we handle bucket security ? :)
+     */
     private function ensureBucketExists()
     {
         if ($this->bucketExists) {

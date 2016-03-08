@@ -16,12 +16,12 @@ class Client
         return $pointer;
     }
 
-    public function fwrite($pointer, $chunk)
+    public function fwrite($pointer, string $chunk)
     {
         return fwrite($pointer, $chunk);
     }
 
-    public function fread($pointer, $length)
+    public function fread($pointer, int $length)
     {
         return fread($pointer, $length);
     }
@@ -31,12 +31,12 @@ class Client
         return fclose($pointer);
     }
 
-    public function fseek($pointer, $position)
+    public function fseek($pointer, int $position)
     {
         return fseek($pointer, $position);
     }
 
-    public function mkdir($path)
+    public function mkdir(string $path)
     {
         if (is_dir($path)) {
             return true;
@@ -45,7 +45,7 @@ class Client
         return mkdir($path, 0777, true);
     }
 
-    public function unlink($path)
+    public function unlink(string $path)
     {
         return @unlink($path);
     }
@@ -53,11 +53,23 @@ class Client
     /**
      * @param string $path
      *
-     * @return \RecursiveIteratorIterator
+     * @return \DirectoryIterator
      *
-     * @throws \UnexpectedValueException
+     * @throws \UnexpectedValueException If $path does not exists
      */
-    public function list(string $path)
+    public function list(string $path): \DirectoryIterator
+    {
+        return new \DirectoryIterator($path);
+        /*return new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator(
+                $path,
+                \FilesystemIterator::SKIP_DOTS | \FilesystemIterator::UNIX_PATHS
+            ),
+            \RecursiveIteratorIterator::CHILD_FIRST
+        );*/
+    }
+
+    public function find(string $path): \RecursiveIteratorIterator
     {
         return new \RecursiveIteratorIterator(
             new \RecursiveDirectoryIterator(

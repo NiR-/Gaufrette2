@@ -6,6 +6,7 @@ namespace Gaufrette;
 
 final class File implements \IteratorAggregate
 {
+    private $path;
     private $content;
     private $size;
     private $metadata;
@@ -36,17 +37,16 @@ final class File implements \IteratorAggregate
         return $size;
     }
 
+    /**
+     * @TODO: think of any other way to retrieve the size in a lazy way
+     * For exemple, local adapter could use filesize and aws s3 stream headers
+     */
     public function getSize(): int
     {
         if (null !== $this->size) {
             return $this->size;
         }
         return $this->size = $this->calculateSize($this->content);
-    }
-
-    public function getContent(): callable
-    {
-        return $this->content;
     }
 
     public function getIterator(): \Iterator

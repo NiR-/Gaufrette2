@@ -16,8 +16,10 @@ final class Infrastructure implements Context, SnippetAcceptingContext
     private $file;
     private $deleteExpectation;
     private $treeInitializer;
-    private $list;
-    private $treeExpectation;
+    private $directory;
+    private $directoryExpectation;
+    private $findExpectation;
+    private $findResult;
 
     public function __construct(
         Filesystem $fs,
@@ -25,14 +27,16 @@ final class Infrastructure implements Context, SnippetAcceptingContext
         callable $writeExpectation,
         callable $deleteExpectation,
         callable $treeInitializer,
-        callable $treeExpectation
+        callable $directoryExpectation,
+        callable $findExpectation
     ) {
         $this->fs = $fs;
-        $this->readInitializer   = $readInitializer;
-        $this->writeExpectation  = $writeExpectation;
-        $this->deleteExpectation = $deleteExpectation;
-        $this->treeInitializer   = $treeInitializer;
-        $this->treeExpectation   = $treeExpectation;
+        $this->readInitializer      = $readInitializer;
+        $this->writeExpectation     = $writeExpectation;
+        $this->deleteExpectation    = $deleteExpectation;
+        $this->treeInitializer      = $treeInitializer;
+        $this->directoryExpectation = $directoryExpectation;
+        $this->findExpectation      = $findExpectation;
     }
 
     /**
@@ -107,26 +111,43 @@ final class Infrastructure implements Context, SnippetAcceptingContext
     }
 
     /**
-     * @Given there is a complex tree structure
+     * @Given a complex tree structure
      */
-    public function thereIsAComplexTreeStructure()
+    public function aComplexTreeStructure()
     {
         ($this->treeInitializer)();
     }
 
     /**
-     * @When I list
+     * @When I read directory :directory content
      */
-    public function iList()
+    public function iListDirectoryContent($directory)
     {
-        $this->list = $this->fs->list();
+        $this->directory = $this->fs->readDirectory($directory);
     }
 
     /**
-     * @Then I should see the complex tree structure
+     * @Then I should see the directory content
      */
-    public function iShouldSeeTheComplexTreeStructure()
+    public function iShouldSeeTheDirectoryContent()
     {
-        ($this->treeExpectation)($this->list);
+        ($this->directoryExpectation)($this->directory);
+    }
+
+    /**
+     * @When I search in directory :directory
+     * @When I search for pattern :pattern in directory :directory
+     */
+    public function iSearchForPatternInDirectory($directory, $pattern = '')
+    {
+        $this->findResult = $this->fs->find($directory, $pattern);
+    }
+
+    /**
+     * @Then I should see the complete tree
+     */
+    public function iShouldSeeTheCompleteTree()
+    {
+        ($this->findExpectation)($this->findResult);
     }
 }

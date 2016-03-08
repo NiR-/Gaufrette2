@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Gaufrette\Filesystem\AwsS3;
 
 use Behat\Behat\Context\Argument\ArgumentResolver;
+use Gaufrette\Directory;
 use Gaufrette\File;
 use Gaufrette\Filesystem\AwsS3;
 use Aws\S3\S3Client;
@@ -29,15 +30,15 @@ final class FeatureContextResolver implements ArgumentResolver
         $bucket = getenv('AWS_BUCKET_NAME');
         $basePath = 'base/path/';
 
+        if ($client->doesBucketExist($bucket)) {
+            $client->deleteMatchingObjects($bucket, $basePath);
+            $client->deleteBucket(['Bucket' => $bucket]);
+        }
+        $client->createBucket(['Bucket' => $bucket]);
+
         return [
             new AwsS3\Filesystem($client, $bucket, $basePath),
             function($path) use($client, $bucket, $basePath) {
-                if (!$client->doesBucketExist($bucket)) {
-                    $client->createBucket([
-                        'Bucket' => $bucket,
-                    ]);
-                }
-
                 $client->putObject([
                     'Bucket' => $bucket,
                     'Key' => $basePath.ltrim($path, '/'),
@@ -65,10 +66,31 @@ final class FeatureContextResolver implements ArgumentResolver
                     'Body'   => 'another file',
                 ]);
             },
-            function($list) use($client, $bucket, $basePath) {
-                $files = iterator_to_array($list);
-                expect($files['base/path/complex/tree/1.txt'])->toHaveType(File::class);
-                expect($files['base/path/complex/tree/structure/2.txt'])->toHaveType(File::class);
+            function(Directory $directory) use($client, $bucket, $basePath) {
+                $files = iterator_to_array($directory);
+                expect(array_keys($files))->toBeLike([
+                    'complex/tree',
+                    'complex/tree/1.txt',
+                    'complex/tree/structure',
+                    'complex/tree/structure/2.txt'
+                ]);
+                expect($files['complex/tree'])->toHaveType(Directory::class);
+                expect($files['complex/tree/1.txt'])->toHaveType(File::class);
+                expect($files['complex/tree/structure'])->toHaveType(Directory::class);
+                expect($files['complex/tree/structure/2.txt'])->toHaveType(File::class);
+            },
+            function(\Iterator $completeList) use($client, $bucket, $basePath) {
+                $list = iterator_to_array($completeList);
+                expect(array_keys($list))->toBeLike([
+                    'complex/tree',
+                    'complex/tree/1.txt',
+                    'complex/tree/structure',
+                    'complex/tree/structure/2.txt'
+                ]);
+                expect($list['complex/tree'])->toHaveType(Directory::class);
+                expect($list['complex/tree/1.txt'])->toHaveType(File::class);
+                expect($list['complex/tree/structure'])->toHaveType(Directory::class);
+                expect($list['complex/tree/structure/2.txt'])->toHaveType(File::class);
             }
         ];
     }

@@ -25,7 +25,8 @@
     "autoload": {
         "psr-0": {
             "Gaufrette\\": "src"
-        }
+        },
+        "files": ["src/Gaufrette/functions.php"]
     },
     "autoload-dev": {
         "psr-0": {

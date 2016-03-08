@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Gaufrette;
 
+/**
+ * @TODO: remove useless throws phpdoc on lazy methods
+ */
 interface Filesystem
 {
     /**
@@ -15,6 +18,29 @@ interface Filesystem
      * @throws Exception\CouldNotRead
      */
     public function read(string $path): File;
+
+    /**
+     * @param string $path
+     *
+     * @return Directory
+     *
+     * @throws Exception\DirectoryDoesNotExists
+     * @throws Exception\CouldNotList
+     */
+    public function readDirectory(string $path): Directory;
+
+    /**
+     * Find a specific pattern in a directory and its children
+     *
+     * @param string $path
+     * @param string $pattern
+     *
+     * @return \Iterator
+     *
+     * @throws Exception\DirectoryDoesNotExists
+     * @throws Exception\CouldNotList
+     */
+    public function find(string $path, string $pattern = ''): \Iterator;
 
     /**
      * @param File $file
@@ -29,13 +55,4 @@ interface Filesystem
      * @throws Exception\CouldNotDelete
      */
     public function delete(File $file);
-
-    /**
-     * @param string $directory
-     *
-     * @return \Iterator
-     *
-     * @throws Exception\CouldNotList
-     */
-    public function list(string $directory = ''): \Iterator;
 }
