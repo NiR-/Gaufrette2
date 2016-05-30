@@ -1,12 +1,12 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types = 1);
 
 namespace Gaufrette\Filesystem\Local;
 
 use Gaufrette\Exception\CouldNotDelete;
 use Gaufrette\Exception\CouldNotList;
-use Gaufrette\Exception\CouldNotOpen;;
+use Gaufrette\Exception\CouldNotOpen;
 use Gaufrette\Exception\CouldNotRead;
 use Gaufrette\Exception\CouldNotWrite;
 use Gaufrette\File;
@@ -30,7 +30,7 @@ final class Filesystem implements \Gaufrette\Filesystem
     public function __construct(string $basePath, Client $client = null, $chunkSize = 1024)
     {
         $this->basePath = $basePath;
-        $this->client = $client ?: new Client;
+        $this->client = $client ?: new Client();
         $this->chunkSize = $chunkSize;
     }
 
@@ -60,8 +60,7 @@ final class Filesystem implements \Gaufrette\Filesystem
                     throw CouldNotWrite::create($this, $file->getPath());
                 }
             }
-        }
-        finally {
+        } finally {
             $this->client->fclose($pointer);
         }
     }
@@ -84,7 +83,7 @@ final class Filesystem implements \Gaufrette\Filesystem
         $realBasePath = realpath($this->basePath);
 
         try {
-            $iterator = $this->client->list($this->absolutify(rtrim($path, '/') . '/'));
+            $iterator = $this->client->list($this->absolutify(rtrim($path, '/').'/'));
 
             foreach ($iterator as $file) {
                 if (!$file->isFile()) {
@@ -105,7 +104,7 @@ final class Filesystem implements \Gaufrette\Filesystem
      */
     private function iterate($path): callable
     {
-        return function() use($path) {
+        return function () use ($path) {
             if (!$pointer = $this->client->fopen($this->absolutify($path), 'r')) {
                 throw CouldNotOpen::create($this, $path);
             }
@@ -117,8 +116,7 @@ final class Filesystem implements \Gaufrette\Filesystem
                 if (false === $chunk) {
                     throw CouldNotRead::create($this, $path);
                 }
-            }
-            finally {
+            } finally {
                 $this->client->fclose($pointer);
             }
         };
