@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types = 1);
 
 namespace Gaufrette\Filesystem\AwsS3;
 
@@ -21,7 +21,7 @@ final class FeatureContextResolver implements ArgumentResolver
             'region' => getenv('AWS_REGION'),
             'version' => 'latest',
             'credentials' => [
-                'key'    => getenv('AWS_ACCESS_KEY'),
+                'key' => getenv('AWS_ACCESS_KEY'),
                 'secret' => getenv('AWS_SECRET_KEY'),
             ],
         ]);
@@ -31,7 +31,7 @@ final class FeatureContextResolver implements ArgumentResolver
 
         return [
             new AwsS3\Filesystem($client, $bucket, $basePath),
-            function($path) use($client, $bucket, $basePath) {
+            function ($path) use ($client, $bucket, $basePath) {
                 if (!$client->doesBucketExist($bucket)) {
                     $client->createBucket([
                         'Bucket' => $bucket,
@@ -44,32 +44,32 @@ final class FeatureContextResolver implements ArgumentResolver
                     'Body' => 'some content',
                 ]);
             },
-            function($path) use($client, $bucket, $basePath) {
+            function ($path) use ($client, $bucket, $basePath) {
                 expect(strlen((string) $client->getObject([
                     'Bucket' => $bucket,
                     'Key' => $basePath.ltrim($path, '/'),
                 ])['Body']))->toBe(1024 * 3);
             },
-            function($path) use($client, $bucket, $basePath) {
+            function ($path) use ($client, $bucket, $basePath) {
                 expect($client->doesObjectExist($bucket, $basePath.ltrim($path, '/')))->toBe(false);
             },
-            function() use($client, $bucket, $basePath) {
+            function () use ($client, $bucket, $basePath) {
                 $client->putObject([
                     'Bucket' => $bucket,
-                    'Key'    => $basePath.'complex/tree/1.txt',
-                    'Body'   => 'some content',
+                    'Key' => $basePath.'complex/tree/1.txt',
+                    'Body' => 'some content',
                 ]);
                 $client->putObject([
                     'Bucket' => $bucket,
-                    'Key'    => $basePath.'complex/tree/structure/2.txt',
-                    'Body'   => 'another file',
+                    'Key' => $basePath.'complex/tree/structure/2.txt',
+                    'Body' => 'another file',
                 ]);
             },
-            function($list) use($client, $bucket, $basePath) {
+            function ($list) use ($client, $bucket, $basePath) {
                 $files = iterator_to_array($list);
                 expect($files['base/path/complex/tree/1.txt'])->toHaveType(File::class);
                 expect($files['base/path/complex/tree/structure/2.txt'])->toHaveType(File::class);
-            }
+            },
         ];
     }
 }

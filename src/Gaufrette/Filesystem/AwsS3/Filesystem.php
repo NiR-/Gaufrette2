@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types = 1);
 
 namespace Gaufrette\Filesystem\AwsS3;
 
@@ -41,9 +41,9 @@ final class Filesystem implements \Gaufrette\Filesystem
         string $basePath = '',
         int $chunkSize = MultipartUploader::PART_MIN_SIZE
     ) {
-        $this->s3Client  = $client;
-        $this->bucket    = $bucket;
-        $this->basePath  = $basePath;
+        $this->s3Client = $client;
+        $this->bucket = $bucket;
+        $this->basePath = $basePath;
         $this->chunkSize = $chunkSize;
     }
 
@@ -102,7 +102,7 @@ final class Filesystem implements \Gaufrette\Filesystem
         try {
             $files = $this->s3Client->getIterator('ListObjects', [
                 'Bucket' => $this->bucket,
-                'Prefix' => $this->absolutify($path)
+                'Prefix' => $this->absolutify($path),
             ]);
 
             foreach ($files as $file) {
@@ -123,8 +123,8 @@ final class Filesystem implements \Gaufrette\Filesystem
         return function () use ($path) {
             $command = $this->s3Client->getCommand('GetObject', [
                 'Bucket' => $this->bucket,
-                'Key'    => $this->absolutify($path),
-                '@http'  => ['stream' => true],
+                'Key' => $this->absolutify($path),
+                '@http' => ['stream' => true],
             ]);
 
             try {

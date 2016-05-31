@@ -1,11 +1,12 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types = 1);
 
 namespace Gaufrette;
 
 final class File implements \IteratorAggregate
 {
+    private $path;
     private $content;
     private $size;
     private $metadata;
@@ -41,6 +42,7 @@ final class File implements \IteratorAggregate
         if (null !== $this->size) {
             return $this->size;
         }
+
         return $this->size = $this->calculateSize($this->content);
     }
 
