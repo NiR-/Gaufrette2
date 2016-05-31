@@ -1,0 +1,6 @@
+suites:
+    default:
+        namespace: Gaufrette
+        psr4_prefix: Gaufrette
+        src_path: src
+        spec_prefix: spec
