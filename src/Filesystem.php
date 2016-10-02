@@ -31,11 +31,11 @@ interface Filesystem
     public function delete(File $file);
 
     /**
-     * @param string $directory
+     * @param string $path
      *
      * @return \Iterator
      *
      * @throws Exception\CouldNotList
      */
-    public function list(string $directory = ''): \Iterator;
+    public function find(string $path): \Iterator;
 }

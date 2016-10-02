@@ -95,7 +95,7 @@ final class Filesystem implements \Gaufrette\Filesystem
     /**
      * {@inheritdoc}
      */
-    public function list(string $path = ''): \Iterator
+    public function find(string $path): \Iterator
     {
         $this->ensureBucketExists();
 

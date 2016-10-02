@@ -16,7 +16,7 @@ Feature: filesystem
         When I delete it
         Then it should be deleted
 
-    Scenario: list
-        Given there is a complex tree structure
-        When I list
+    Scenario: find
+        Given a complex tree structure
+        When I search
         Then I should see the complex tree structure

@@ -71,8 +71,8 @@ class FilesystemSpec extends ObjectBehavior
 
     function it_throws_if_could_not_list($client)
     {
-        $client->list('/base/path/a/complex/path')->willThrow('Exception');
-        $generator = $this->list('does/not/exists/');
+        $client->find('/base/path/a/complex/path')->willThrow('Exception');
+        $generator = $this->find('does/not/exists/');
         $generator->shouldThrow(CouldNotList::class)->during('current');
     }
 }

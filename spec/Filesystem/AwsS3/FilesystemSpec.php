@@ -94,7 +94,7 @@ class FilesystemSpec extends ObjectBehavior
             ->willThrow(S3Exception::class)
         ;
 
-        $generator = $this->list('does/not/exists/');
+        $generator = $this->find('does/not/exists/');
         $generator->shouldThrow(CouldNotList::class)->during('current');
     }
 }

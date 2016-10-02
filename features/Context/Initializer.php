@@ -18,7 +18,7 @@ abstract class Initializer
     }
 
     /**
-     * Called right before listing a directory cotnent
+     * Called right before listing directory content
      *
      * @return void
      */

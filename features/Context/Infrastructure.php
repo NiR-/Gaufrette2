@@ -20,7 +20,7 @@ final class Infrastructure implements Context, SnippetAcceptingContext
 
     private $path;
     private $file;
-    private $list;
+    private $find;
 
     public function __construct(Filesystem $fs, Initializer $initializer, Tester $tester)
     {
@@ -103,19 +103,19 @@ final class Infrastructure implements Context, SnippetAcceptingContext
     }
 
     /**
-     * @Given there is a complex tree structure
+     * @Given a complex tree structure
      */
-    public function thereIsAComplexTreeStructure()
+    public function aComplexTreeStructure()
     {
         $this->initializer->initTreeStructure();
     }
 
     /**
-     * @When I list
+     * @When I search
      */
-    public function iList()
+    public function iSearch()
     {
-        $this->list = $this->fs->list();
+        $this->find = $this->fs->find('/');
     }
 
     /**
@@ -123,7 +123,7 @@ final class Infrastructure implements Context, SnippetAcceptingContext
      */
     public function iShouldSeeTheComplexTreeStructure()
     {
-        $files = iterator_to_array($this->list);
+        $files = iterator_to_array($this->find);
         $keys = array_keys($files);
         sort($keys);
 

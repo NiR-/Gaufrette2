@@ -59,7 +59,7 @@ class Client
      *
      * @TODO: check that it preserves link name
      */
-    public function list(string $path)
+    public function find(string $path)
     {
         return new \RecursiveIteratorIterator(
             new \RecursiveDirectoryIterator(

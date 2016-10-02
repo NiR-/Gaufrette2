@@ -78,13 +78,13 @@ final class Filesystem implements \Gaufrette\Filesystem
     /**
      * {@inheritdoc}
      */
-    public function list(string $path = '/'): \Iterator
+    public function find(string $path): \Iterator
     {
         // Preserve first slash
         $basePathLen = strlen($this->basePath) - 1;
 
         try {
-            $iterator = $this->client->list($this->absolutify(rtrim($path, '/').'/'));
+            $iterator = $this->client->find($this->absolutify(rtrim($path, '/').'/'));
 
             foreach ($iterator as $file) {
                 if (!$file->isFile()) {
