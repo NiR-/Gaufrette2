@@ -56,6 +56,8 @@ class Client
      * @return \RecursiveIteratorIterator
      *
      * @throws \UnexpectedValueException
+     *
+     * @TODO: check that it preserves link name
      */
     public function list(string $path)
     {

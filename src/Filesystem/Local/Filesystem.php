@@ -29,7 +29,7 @@ final class Filesystem implements \Gaufrette\Filesystem
      */
     public function __construct(string $basePath, Client $client = null, $chunkSize = 1024)
     {
-        $this->basePath = $basePath;
+        $this->basePath = rtrim($basePath, '/') . '/';
         $this->client = $client ?: new Client();
         $this->chunkSize = $chunkSize;
     }
@@ -80,7 +80,8 @@ final class Filesystem implements \Gaufrette\Filesystem
      */
     public function list(string $path = '/'): \Iterator
     {
-        $realBasePath = realpath($this->basePath);
+        // Preserve first slash
+        $basePathLen = strlen($this->basePath) - 1;
 
         try {
             $iterator = $this->client->list($this->absolutify(rtrim($path, '/').'/'));
@@ -90,7 +91,8 @@ final class Filesystem implements \Gaufrette\Filesystem
                     continue;
                 }
 
-                yield substr($file->getPathname(), strlen($realBasePath)) => $this->read($file->getPathname());
+                $relativeKey = substr($file->getPathname(), $basePathLen);
+                yield $relativeKey => $this->read($file->getPathname());
             }
         } catch (\Throwable $e) {
             throw CouldNotList::create($this, $path, $e);

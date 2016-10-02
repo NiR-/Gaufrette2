@@ -43,7 +43,7 @@ final class Filesystem implements \Gaufrette\Filesystem
     ) {
         $this->s3Client = $client;
         $this->bucket = $bucket;
-        $this->basePath = $basePath;
+        $this->basePath = rtrim($basePath, '/').'/';
         $this->chunkSize = $chunkSize;
     }
 
@@ -99,6 +99,9 @@ final class Filesystem implements \Gaufrette\Filesystem
     {
         $this->ensureBucketExists();
 
+        // Preserve first slash
+        $basePathLen = strlen($this->basePath) - 1;
+
         try {
             $files = $this->s3Client->getIterator('ListObjects', [
                 'Bucket' => $this->bucket,
@@ -106,7 +109,8 @@ final class Filesystem implements \Gaufrette\Filesystem
             ]);
 
             foreach ($files as $file) {
-                yield $file['Key'] => $this->read($file['Key']);
+                $relativeKey = substr($file['Key'], $basePathLen);
+                yield $relativeKey => $this->read($file['Key']);
             }
         } catch (S3Exception $previous) {
             throw Exception\CouldNotList::create($this, $path, $previous);
