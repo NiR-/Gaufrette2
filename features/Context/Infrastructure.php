@@ -9,30 +9,24 @@ use Gaufrette\File;
 
 final class Infrastructure implements Context, SnippetAcceptingContext
 {
-    private $readInitializer;
-    private $writeExpectation;
+    /** @var Filesystem */
     private $fs;
+
+    /** @var Initializer */
+    private $initializer;
+
+    /** @var Tester */
+    private $tester;
+
     private $path;
     private $file;
-    private $deleteExpectation;
-    private $treeInitializer;
     private $list;
-    private $treeExpectation;
 
-    public function __construct(
-        Filesystem $fs,
-        callable $readInitializer,
-        callable $writeExpectation,
-        callable $deleteExpectation,
-        callable $treeInitializer,
-        callable $treeExpectation
-    ) {
-        $this->fs = $fs;
-        $this->readInitializer   = $readInitializer;
-        $this->writeExpectation  = $writeExpectation;
-        $this->deleteExpectation = $deleteExpectation;
-        $this->treeInitializer   = $treeInitializer;
-        $this->treeExpectation   = $treeExpectation;
+    public function __construct(Filesystem $fs, Initializer $initializer, Tester $tester)
+    {
+        $this->fs          = $fs;
+        $this->initializer = $initializer;
+        $this->tester      = $tester;
     }
 
     /**
@@ -41,7 +35,7 @@ final class Infrastructure implements Context, SnippetAcceptingContext
     public function aFileStoredAt($path)
     {
         $this->path = $path;
-        ($this->readInitializer)($path);
+        $this->initializer->initFileToBeRead($path);
     }
 
     /**
@@ -67,6 +61,8 @@ final class Infrastructure implements Context, SnippetAcceptingContext
     public function aFileObjectFor($path)
     {
         $this->path = $path;
+
+        // Create a file with 3 chunks of 1024 "a"
         $this->file = new File($path, function(){
             for($i = 0; $i < 3; $i++) {
                 yield implode(array_fill(0, 1024, 'a'));
@@ -87,7 +83,7 @@ final class Infrastructure implements Context, SnippetAcceptingContext
      */
     public function itShouldBeStored()
     {
-        ($this->writeExpectation)($this->path);
+        expect($this->tester->getFileSize($this->path))->toBe(3 * 1024);
     }
 
     /**
@@ -103,7 +99,7 @@ final class Infrastructure implements Context, SnippetAcceptingContext
      */
     public function itShouldBeDeleted()
     {
-        ($this->deleteExpectation)($this->path);
+        expect($this->tester->fileExists($this->path))->toBe(false);
     }
 
     /**
@@ -111,7 +107,7 @@ final class Infrastructure implements Context, SnippetAcceptingContext
      */
     public function thereIsAComplexTreeStructure()
     {
-        ($this->treeInitializer)();
+        $this->initializer->initTreeStructure();
     }
 
     /**
@@ -127,6 +123,15 @@ final class Infrastructure implements Context, SnippetAcceptingContext
      */
     public function iShouldSeeTheComplexTreeStructure()
     {
-        ($this->treeExpectation)($this->list);
+        $files = iterator_to_array($this->list);
+        $keys = array_keys($files);
+        sort($keys);
+
+        expect($keys)->toBeLike([
+            '/complex/tree/1.txt',
+            '/complex/tree/structure/2.txt',
+        ]);
+        expect($files['/complex/tree/1.txt'])->toHaveType(File::class);
+        expect($files['/complex/tree/structure/2.txt'])->toHaveType(File::class);
     }
 }

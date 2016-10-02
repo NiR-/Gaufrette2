@@ -2,16 +2,14 @@
 
 namespace features\Context;
 
+use Behat\Behat\Context\ServiceContainer\ContextExtension;
 use Behat\Testwork\ServiceContainer;
-use Symfony\Component\DependencyInjection\Definition;
-use Behat\Testwork\Exception\ServiceContainer\ExceptionExtension;
 use Behat\Testwork\ServiceContainer\ExtensionManager;
+use Gaufrette\Filesystem\AwsS3\Behat\FeatureContextResolver as AwsS3;
+use Gaufrette\Filesystem\Local\Behat\FeatureContextResolver as Local;
+use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Behat\Behat\Context\ServiceContainer\ContextExtension;
-use features\Context\Initializer\Filesystem;
-use Gaufrette\Filesystem\AwsS3\FeatureContextResolver as AwsS3;
-use Gaufrette\Filesystem\Local\FeatureContextResolver as Local;
 
 final class Extension implements ServiceContainer\Extension
 {
