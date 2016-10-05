@@ -25,7 +25,7 @@ class Initializer extends \features\Context\Initializer
         $fullPath = $this->basePath . $path;
 
         @unlink($fullPath);
-        @mkdir(dirname($fullPath), 0777, true);
+        @mkdir(\Gaufrette\dirname($fullPath), 0777, true);
         file_put_contents($fullPath, 'some content');
     }
 

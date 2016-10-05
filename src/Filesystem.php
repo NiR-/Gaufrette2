@@ -17,6 +17,18 @@ interface Filesystem
     public function read(string $path): File;
 
     /**
+     * @param string $path
+     *
+     * @return Directory
+     *
+     * @throws Exception\DirectoryDoesNotExists
+     * @throws Exception\CouldNotList
+     *
+     * @TODO: What's the difference between both exceptions ?
+     */
+    public function list(string $path): Directory;
+
+    /**
      * @param File $file
      *
      * @throws Exception\CouldNotWrite

@@ -86,15 +86,16 @@ class FilesystemSpec extends ObjectBehavior
         $this->shouldThrow(CouldNotDelete::class)->during('delete', [new File('a/path', function () {})]);
     }
 
-    function it_throws_if_could_not_list($client)
+    function it_throws_if_could_not_list_directory_content($client)
     {
         $client->doesBucketExist('bucket-name')->willReturn(true);
         $client
-            ->getIterator('ListObjects', ['Bucket' => 'bucket-name', 'Prefix' => 'base/path/does/not/exists/'])
+            ->getIterator('ListObjects', ['Bucket' => 'bucket-name', 'Prefix' => 'base/path/a/path/'])
+            ->shouldBeCalled()
             ->willThrow(S3Exception::class)
         ;
 
-        $generator = $this->find('does/not/exists/');
-        $generator->shouldThrow(CouldNotList::class)->during('current');
+        $directory = $this->list('a/path');
+        expect($directory->getIterator())->shouldThrow(CouldNotList::class)->during('current');
     }
 }

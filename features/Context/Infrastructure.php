@@ -4,6 +4,7 @@ namespace features\Context;
 
 use Behat\Behat\Context\Context;
 use Behat\Behat\Context\SnippetAcceptingContext;
+use Gaufrette\Directory;
 use Gaufrette\Filesystem;
 use Gaufrette\File;
 
@@ -21,6 +22,7 @@ final class Infrastructure implements Context, SnippetAcceptingContext
     private $path;
     private $file;
     private $find;
+    private $directory;
 
     public function __construct(Filesystem $fs, Initializer $initializer, Tester $tester)
     {
@@ -111,11 +113,36 @@ final class Infrastructure implements Context, SnippetAcceptingContext
     }
 
     /**
+     * @When I list directory :directory content
+     */
+    public function iListDirectoryContent($directory)
+    {
+        $this->directory = $this->fs->list($directory);
+    }
+
+    /**
+     * @Then I should see the directory content
+     */
+    public function iShouldSeeTheDirectoryContent()
+    {
+        $list = iterator_to_array($this->directory);
+        $keys = array_keys($list);
+        sort($keys);
+
+        expect($keys)->toBe([
+            '/complex/tree/1.txt',
+            '/complex/tree/structure/',
+        ]);
+        expect($list['/complex/tree/1.txt'])->toHaveType(File::class);
+        expect($list['/complex/tree/structure/'])->toHaveType(Directory::class);
+    }
+
+    /**
      * @When I search
      */
     public function iSearch()
     {
-        $this->find = $this->fs->find('/');
+        $this->find = $this->fs->find('/complex/tree/');
     }
 
     /**
@@ -128,10 +155,14 @@ final class Infrastructure implements Context, SnippetAcceptingContext
         sort($keys);
 
         expect($keys)->toBeLike([
+            '/complex/tree/',
             '/complex/tree/1.txt',
+            '/complex/tree/structure/',
             '/complex/tree/structure/2.txt',
         ]);
+        expect($files['/complex/tree/'])->toHaveType(Directory::class);
         expect($files['/complex/tree/1.txt'])->toHaveType(File::class);
+        expect($files['/complex/tree/structure/'])->toHaveType(Directory::class);
         expect($files['/complex/tree/structure/2.txt'])->toHaveType(File::class);
     }
 }

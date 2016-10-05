@@ -30,6 +30,7 @@
     "autoload-dev": {
         "psr-0": {
             "features\\": ""
-        }
+        },
+        "files": ["src/functions.php"]
     }
 }

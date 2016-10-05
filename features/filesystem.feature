@@ -16,6 +16,11 @@ Feature: filesystem
         When I delete it
         Then it should be deleted
 
+    Scenario: list directory content
+        Given a complex tree structure
+        When I list directory "/complex/tree" content
+        Then I should see the directory content
+
     Scenario: find
         Given a complex tree structure
         When I search

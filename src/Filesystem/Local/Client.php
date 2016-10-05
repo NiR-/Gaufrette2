@@ -50,6 +50,19 @@ class Client
         return @unlink($path);
     }
 
+
+    /**
+     * @param string $path
+     *
+     * @return \DirectoryIterator
+     *
+     * @throws \UnexpectedValueException If $path does not exists
+     */
+    public function list(string $path): \DirectoryIterator
+    {
+        return new \DirectoryIterator($path);
+    }
+
     /**
      * @param string $path
      *

@@ -4,11 +4,13 @@ declare (strict_types = 1);
 
 namespace Gaufrette\Filesystem\Local;
 
+use Gaufrette\Directory;
 use Gaufrette\Exception\CouldNotDelete;
 use Gaufrette\Exception\CouldNotList;
 use Gaufrette\Exception\CouldNotOpen;
 use Gaufrette\Exception\CouldNotRead;
 use Gaufrette\Exception\CouldNotWrite;
+use Gaufrette\Exception\DirectoryDoesNotExists;
 use Gaufrette\File;
 
 final class Filesystem implements \Gaufrette\Filesystem
@@ -45,6 +47,14 @@ final class Filesystem implements \Gaufrette\Filesystem
     /**
      * {@inheritdoc}
      */
+    public function list(string $path): Directory
+    {
+        return new Directory($path, $this->iterateDirectory($path));
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function write(File $file)
     {
         if (!$pointer = $this->client->fopen($this->absolutify($file->getPath()), 'w+')) {
@@ -52,8 +62,8 @@ final class Filesystem implements \Gaufrette\Filesystem
         }
 
         try {
-            if (!$this->client->mkdir($this->absolutify(dirname($file->getPath())))) {
-                throw CouldNotWrite::create($this, dirname($file->getPath()));
+            if (!$this->client->mkdir($this->absolutify(\Gaufrette\dirname($file->getPath())))) {
+                throw CouldNotWrite::create($this, \Gaufrette\dirname($file->getPath()));
             }
             foreach ($file as $chunk) {
                 if (false === $this->client->fwrite($pointer, $chunk)) {
@@ -78,25 +88,19 @@ final class Filesystem implements \Gaufrette\Filesystem
     /**
      * {@inheritdoc}
      */
-    public function find(string $path): \Iterator
+    public function find(string $path, string $pattern = ''): \Iterator
     {
-        // Preserve first slash
-        $basePathLen = strlen($this->basePath) - 1;
+        if (!empty($pattern)) {
+            throw new \InvalidArgumentException('Pattern is not supported by the Local adapter for now.');
+        }
 
         try {
-            $iterator = $this->client->find($this->absolutify(rtrim($path, '/').'/'));
-
-            foreach ($iterator as $file) {
-                if (!$file->isFile()) {
-                    continue;
-                }
-
-                $relativeKey = substr($file->getPathname(), $basePathLen);
-                yield $relativeKey => $this->read($file->getPathname());
-            }
-        } catch (\Throwable $e) {
-            throw CouldNotList::create($this, $path, $e);
+            $iterator = $this->client->find($this->absolutify($path));
+        } catch (\UnexpectedValueException $e) {
+            throw DirectoryDoesNotExists::create($path, $e);
         }
+
+        return $this->hydrateDirectoryList($iterator, $this->list($path));
     }
 
     /**
@@ -122,6 +126,38 @@ final class Filesystem implements \Gaufrette\Filesystem
                 $this->client->fclose($pointer);
             }
         };
+    }
+
+    private function iterateDirectory(string $path): callable
+    {
+        return function () use ($path) {
+            try {
+                $iterator = $this->client->list($this->absolutify($path));
+            } catch (\UnexpectedValueException $e) {
+                throw DirectoryDoesNotExists::create($path, $e);
+            }
+
+            return $this->hydrateDirectoryList($iterator);
+        };
+    }
+
+    private function hydrateDirectoryList(\Iterator $iterator, Directory $directory = null): \Iterator
+    {
+        $basePathLen = strlen($this->basePath) - 1;
+
+        if ($directory) {
+            yield $directory->getPath() => $directory;
+        }
+
+        foreach ($iterator as $item) {
+            $relativePath = substr($iterator->getPathname(), $basePathLen);
+
+            if ($item->isFile()) {
+                yield $relativePath => $this->read($relativePath);
+            } elseif (!$iterator->isDot()) {
+                yield rtrim($relativePath, '/') . '/' => $this->list($relativePath);
+            }
+        }
     }
 
     /**
